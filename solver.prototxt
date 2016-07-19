@@ -1,3 +1,8 @@
 net: "caffe.prototxt"
 base_lr: 0.00001
+momentum: 0.9
+lr_policy: "step"
+gamma: 0.1
+stepsize: 10000
+max_iter: 35000
 solver_mode: GPU
