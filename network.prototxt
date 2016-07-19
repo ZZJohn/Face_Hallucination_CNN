@@ -222,11 +222,26 @@ layer {
 	top: "a"
 }
 
-layer {
+layer {		// done
 	name: "tanh22"
-	type: "TanH"
+	type: "My1"
 	bottom: "a"
 	top: "a"
 }
 
+layer {		// to be done
+	name: "integrate"
+	type: "My2"
+	bottom: "Irec"
+	bottom: "a"
+	bottom: "Iin"
+	top: "Iout"
+}
 
+layer {
+	name: "loss"
+	type: "EuclideanLoss"
+	bottom: "Iout"
+	bottom: "IH"
+	top: "loss"
+}
