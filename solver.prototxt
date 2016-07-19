@@ -1,0 +1,3 @@
+net: "caffe.prototxt"
+base_lr: 0.00001
+solver_mode: GPU
