@@ -1,0 +1,325 @@
+name: "Bi_channel_net"
+
+layer {
+  name: "LRface"
+  type: "Data"
+  top: "Iin"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: "mean_new_low.binaryproto"
+	scale: 0.00390625
+  }
+  data_param {
+	source: "new_low_db"
+    batch_size: 200
+    backend: LEVELDB
+  }
+}
+
+layer {
+  name: "HRface"
+  type: "Data"
+  top: "Ih"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: "mean_new_high.binaryproto"
+	scale: 0.00390625
+  }
+  data_param {
+	source: "new_high_db"
+    batch_size: 200
+    backend: LEVELDB
+  }
+}
+
+layer {
+	name: "flat_high"
+	type: "Flatten"
+	bottom: "Ih"
+	top: "Ih_flatten"
+}
+
+layer {
+  name: "USface"
+  type: "Data"
+  top: "Iin_upsampled"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mean_file: "mean_new_upsampled.binaryproto"
+	scale: 0.00390625
+  }
+  data_param {
+	source: "new_upsampled_db"
+    batch_size: 200
+    backend: LEVELDB
+  }
+}
+
+layer {
+	name: "flat_low"
+	type: "Flatten"
+	bottom: "Iin_upsampled"
+	top: "Iin_flatten"
+}
+
+layer {
+	name: "conv1"
+	type: "Convolution"
+	param { lr_mult: 1 }
+	param { lr_mult: 0.1 }
+	convolution_param {
+		num_output: 32
+		kernel_size: 5
+		stride: 1
+		weight_filler {
+			type: "gaussian"
+			std: 0.002
+		}
+		bias_filler {
+			type: "constant"
+			value: 0
+		}
+	}
+	bottom: "Iin"
+	top: "I1conv"
+}
+
+layer {
+	name: "tanh1"
+	type: "TanH"
+	bottom: "I1conv"
+	top: "I1conv"
+}
+
+layer {
+	name: "pool1"
+	type: "Pooling"
+	pooling_param {
+		kernel_size: 2
+		stride: 2
+		pool: MAX
+	}
+	bottom: "I1conv"
+	top: "I1"
+}
+
+layer {
+	name: "conv2"
+	type: "Convolution"
+	param { lr_mult: 1 }
+	param { lr_mult: 0.1 }
+	convolution_param {
+		num_output: 64
+		kernel_size: 3
+		stride: 1
+		weight_filler {
+			type: "gaussian"
+			std: 0.002
+		}
+		bias_filler {
+			type: "constant"
+			value: 0
+		}
+	}
+	bottom: "I1"
+	top: "I2conv"
+}
+
+layer {
+	name: "tanh2"
+	type: "TanH"
+	bottom: "I2conv"
+	top: "I2conv"
+}
+
+layer {
+	name: "pool2"
+	type: "Pooling"
+	pooling_param {
+		kernel_size: 2
+		stride: 2
+		pool: MAX
+	}
+	bottom: "I2conv"
+	top: "I2"
+}
+
+layer {
+	name: "conv3"
+	type: "Convolution"
+	param { lr_mult: 1 }
+	param { lr_mult: 0.1 }
+	convolution_param {
+		num_output: 128
+		kernel_size: 3
+		stride: 1
+		weight_filler {
+			type: "gaussian"
+			std: 0.002
+		}
+		bias_filler {
+			type: "constant"
+			value: 0
+		}
+	}
+	bottom: "I2"
+	top: "I3conv"
+}
+
+layer {
+	name: "tanh3"
+	type: "TanH"
+	bottom: "I3conv"
+	top: "I3conv"
+}
+
+layer {
+	name: "pool3"
+	type: "Pooling"
+	pooling_param {
+		kernel_size: 2
+		stride: 2
+		pool: MAX
+	}
+	bottom: "I3conv"
+	top: "I3"
+}
+
+layer {
+	name: "full11"
+	type: "InnerProduct"
+	param { lr_mult: 1 }
+	param { lr_mult: 0.1 }
+	inner_product_param {
+		num_output: 2000
+		weight_filler {
+			type: "gaussian"
+			std: 0.001
+		}
+		bias_filler {
+			type: "constant"
+			value: 0
+		}
+	}
+	bottom: "I3"
+	top: "I4"
+}
+
+layer {
+	name: "tanh11"
+	type: "TanH"
+	bottom: "I4"
+	top: "I4"
+}
+
+layer {
+	name: "full12"
+	type: "InnerProduct"
+	param { lr_mult: 1 }
+	param { lr_mult: 0.1 }
+	inner_product_param {
+		num_output: 30000
+		weight_filler {
+			type: "gaussian"
+			std: 0.001
+		}
+		bias_filler {
+			type: "constant"
+			value: 0
+		}
+	}
+	bottom: "I4"
+	top: "Irec"
+}
+
+layer {
+	name: "tanh12"
+	type: "TanH"
+	bottom: "Irec"
+	top: "Irec"
+}
+
+layer {
+	name: "full21"
+	type: "InnerProduct"
+	param { lr_mult: 1 }
+	param { lr_mult: 0.1 }
+	inner_product_param {
+		num_output: 100
+		weight_filler {
+			type: "gaussian"
+			std: 0.001
+		}
+		bias_filler {
+			type: "constant"
+			value: 0
+		}
+	}
+	bottom: "I3"
+	top: "I5"
+}
+
+layer {
+	name: "tanh21"
+	type: "TanH"
+	bottom: "I5"
+	top: "I5"
+}
+
+layer {
+	name: "full22"
+	type: "InnerProduct"
+	param { lr_mult: 1 }
+	param { lr_mult: 0.1 }
+	inner_product_param {
+		num_output: 1
+		weight_filler {
+			type: "gaussian"
+			std: 0.001
+		}
+		bias_filler {
+			type: "constant"
+			value: 0
+		}
+	}
+	bottom: "I5"
+	top: "a"
+}
+
+layer {
+	name: "tanh22"
+	type: "Python"
+	bottom: "a"
+	top: "a"
+	python_param {
+		module: 'pytanh'
+		layer: 'MyTanHLayer'
+	}
+}
+
+layer {
+	name: "integrate"
+	type: "Python"
+	bottom: "Irec"
+	bottom: "a"
+	bottom: "Iin_flatten"
+	top: "Iout"
+	python_param {
+		module: 'pylinear'
+		layer: 'MyLayer'
+	}
+}
+
+layer {
+	name: "loss"
+	type: "EuclideanLoss"
+	bottom: "Iout"
+	bottom: "Ih_flatten"
+	top: "loss"
+}
