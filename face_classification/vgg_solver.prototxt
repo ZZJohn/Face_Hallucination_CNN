@@ -1,0 +1,23 @@
+# The train/test net protocol buffer definition
+net: "vgg_train_test.prototxt"
+# test_iter specifies how many forward passes the test should carry out.
+test_iter: 20
+# Carry out testing every 500 training iterations.
+test_interval: 80
+# The base learning rate, momentum and the weight decay of the network.
+base_lr: 0.0001
+#lr_policy: "fixed"
+lr_policy: "step"
+gamma: 0.6
+stepsize: 150
+momentum: 0.9
+weight_decay: 0.0005
+# Display every 500 iterations
+display: 10
+# The maximum number of iterations
+max_iter: 2000
+# snapshot intermediate results
+snapshot: 50
+snapshot_prefix: "VGG_step_0.6"
+# solver mode: CPU or GPU
+solver_mode: CPU
